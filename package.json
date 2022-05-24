@@ -1,7 +1,7 @@
 {
   "name": "@openmbee/pane-layout",
   "version": "1.0.29",
-  "description": "A Typescript based set of Angular.js 1.8x Components to manage and define border layouts (Hard Forked from dlam/angular-borderlayout",
+  "description": "A Typescript based set of Angular.js 1.8x Components to manage and define border layouts (Hard Forked from dlamoris/angular-borderlayout",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Enquier/angular-pane-layout.git"
+    "url": "git://github.com/open-mbee/pane-layout.git"
   },
   "keywords": [
     "angular"
@@ -22,9 +22,9 @@
   "author": "Charles Galey",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Enquier/angular-pane-layout/issues"
+    "url": "https://github.com/open-mbee/pane-layout/issues"
   },
-  "homepage": "https://github.com/Enquier/angular-pane-layout",
+  "homepage": "https://openmbee.org",
   "devDependencies": {
     "@types/angular": "^1.8.4",
     "@types/jquery": "^3.5.14",
