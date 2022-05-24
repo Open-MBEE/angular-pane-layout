@@ -1,0 +1,91 @@
+/*
+ * Copyright (c) <2021>, California Institute of Technology ("Caltech").
+ *  U.S. Government sponsorship acknowledged.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+.ng-pane {
+    overflow: visible;
+}
+
+.ng-pane, .ng-pane-overlay, .ng-pane-handle, .ng-pane-scroller {
+    display: block;
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.ng-pane, .ng-pane-overlay, .ng-pane-scroller {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.ng-pane-scroller {
+    overflow: auto;
+}
+
+.ng-pane.ng-pane-closed > .ng-pane-scroller {
+    display: none;
+}
+
+.ng-pane-overlay {
+    display: none;
+    z-index: 9999;
+}
+
+.ng-pane-resizing > .ng-pane-overlay {
+    display: block;
+}
+
+.ng-pane-resizing ~ .ng-pane > .ng-pane-overlay {
+    display: block;
+}
+
+.ng-pane-orientation-vertical > .ng-pane-handle {
+    cursor: row-resize;
+}
+
+.ng-pane-orientation-horizontal > .ng-pane-handle {
+    cursor: col-resize;
+}
+
+.ng-pane-orientation-horizontal > .ng-pane-handle > .ng-pane-toggle {
+    margin: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 100px;
+    max-height: 20%;
+    cursor: pointer;
+}
+
+.ng-pane-orientation-vertical > .ng-pane-handle > .ng-pane-toggle {
+    margin: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100px;
+    max-width: 20%;
+    cursor: pointer;
+}
+
+.ng-pane-closed > .ng-pane-scroller {
+    display: none;
+}

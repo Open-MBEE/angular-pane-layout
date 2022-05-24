@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "baseUrl": "",
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "strictNullChecks": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "downlevelIteration": true,
+    "lib": ["es6", "dom", "ES2017.object", "ES2016.Array.Include", "es2018.promise"],
+    "mapRoot": "./",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "stripInternal": true,
+    "target": "es2017",
+    "typeRoots": [
+      "./lib/index.d.ts",
+      "./node_modules/@types"
+    ]
+  },
+  "exclude": ["node_modules", "**/__tests__/*"]
+}
