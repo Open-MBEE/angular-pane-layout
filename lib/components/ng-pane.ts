@@ -275,7 +275,7 @@ class PaneController implements IPaneInternal {
         return;
       }
       if (!this.noScroll) {
-        $transcludeClone.addClass('ng-pane-scroller');
+        $transcludeEl.addClass('ng-pane-scroller');
         if (this.scrollApi) {
           this.setupScrollEvent(this.$element[0], $transcludeClone, this);
         }
@@ -553,15 +553,19 @@ class PaneController implements IPaneInternal {
   };
 
   public setHandleSize = (handleSize: string | IPaneHandle): boolean => {
-    if (handleSize && typeof handleSize === 'string') {
-      this.handleSizeOpen = handleSize;
-      this.handleSizeClosed = handleSize;
-    } else if (handleSize && ((handleSize as IPaneHandle).open || (handleSize as IPaneHandle).closed)) {
-      handleSize = handleSize as IPaneHandle;
-      this.handleSizeOpen = handleSize.open || '0';
-      this.handleSizeClosed = handleSize.closed || '0';
+    if (!this.noToggle) {
+      if (handleSize && typeof handleSize === 'string') {
+        this.handleSizeOpen = handleSize;
+        this.handleSizeClosed = handleSize;
+      } else if (handleSize && ((handleSize as IPaneHandle).open || (handleSize as IPaneHandle).closed)) {
+        handleSize = handleSize as IPaneHandle;
+        this.handleSizeOpen = handleSize.open || '0';
+        this.handleSizeClosed = handleSize.closed || '0';
+      } else {
+        this.handleSizeOpen = this.handleSizeClosed = this.defaultHandleSize;
+      }
     } else {
-      this.handleSizeOpen = this.handleSizeClosed = this.defaultHandleSize;
+      this.handleSizeOpen = this.handleSizeClosed = '0';
     }
 
     return this.$scheduleReflow();
@@ -700,6 +704,7 @@ class PaneController implements IPaneInternal {
     // Fix for dragging on toggle
     if (this.paneDragged) {
       this.paneDragged = false;
+      return
     }
 
     if (open == null) {
@@ -754,7 +759,7 @@ const NgPaneComponent = {
   },
   template: `
     <div class="ng-pane-overlay"></div>
-    <ng-pane-resizer class="ng-pane-handle"  pane-dragged="$pane.paneDragged" pane-orientation="$pane.orientation"></ng-pane-resizer>
+    <ng-pane-resizer class="ng-pane-handle" pane-orientation="$pane.orientation"></ng-pane-resizer>
 `,
   controllerAs: '$pane',
   transclude: true,

@@ -27,7 +27,6 @@ const NgPaneResizer = {
 `,
   transclude: true,
   bindings: {
-    paneDragged: '<',
     paneOrientation: '<',
   },
   require: {
@@ -127,7 +126,7 @@ const NgPaneResizer = {
           if (!event) {
             return;
           }
-          this.paneDragged = true; // Fix for dragging on toggle
+          this.ngPane.paneDragged = true; // Fix for dragging on toggle
 
           this.ngPane.$onStartResize();
 
