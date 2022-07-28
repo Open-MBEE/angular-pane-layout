@@ -744,7 +744,7 @@ const NgPaneComponent = {
     offsetBottom: '@paneBottom',
     offsetLeft: '@paneLeft',
     handle: '@paneHandle',
-    closed: '@paneClosed',
+    closed: '=paneClosed',
     order: '@paneOrder',
     noToggle: '@paneNoToggle',
     noScroll: '@paneNoScroll',
