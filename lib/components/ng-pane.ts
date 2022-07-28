@@ -23,7 +23,7 @@ import { TransitionService } from '@uirouter/angularjs';
 import { IPaneManagerService } from '../PaneManagerService';
 import { ngPane } from '../ng-pane';
 import { IRegion } from '../region';
-import { generateSerialId, getHandleStyle, getOrientation, getScrollerStyle, handleChange } from '../utils/utils';
+import { generateSerialId, getHandleStyle, getOrientation, getOverlayStyle, handleChange } from '../utils/utils';
 import { Region } from '../region';
 
 export interface IPaneOptions {
@@ -53,7 +53,7 @@ export interface IPane extends angular.IComponentController {
   order: number;
   noToggle: boolean;
   noScroll: boolean;
-  scrollApi;
+  scrollApi: IPaneScrollApi;
   id: string;
   parentCtrl: angular.IComponentController;
   parentCtrlAs: string;
@@ -132,6 +132,14 @@ export interface IPaneHandle {
   closed?: string;
 }
 
+export interface IPaneScrollApi {
+  isScrollVisible?(): boolean;
+  frequency?: number;
+  throttleRate?: number;
+  threshold?: number;
+  notifyOnScroll?(): boolean;
+}
+
 export type IPaneAnchor = 'north' | 'south' | 'east' | 'west';
 export type IPaneOrientation = 'vertical' | 'horizontal';
 
@@ -154,7 +162,7 @@ class PaneController implements IPaneInternal {
   order: number;
   noToggle: boolean;
   noScroll: boolean;
-  scrollApi;
+  scrollApi: IPaneScrollApi;
   id: string;
   parentCtrl: angular.IComponentController;
   parentCtrlAs: string;
@@ -170,7 +178,7 @@ class PaneController implements IPaneInternal {
   $containerEl: JQuery<HTMLElement>;
   $overlayEl: JQuery<HTMLElement>;
   $handleEl: JQuery<HTMLElement>;
-  $scrollerEl: JQuery<HTMLElement>;
+  $transcludeEl: JQuery<HTMLElement>;
   targetSize: string;
   $parent: IPaneScope;
   defaultHandleSize: string = '13';
@@ -236,10 +244,10 @@ class PaneController implements IPaneInternal {
     //
     const $transcludeScope = this.$scope.$new();
     // Compatibility with Previous Directive
-    const $scrollerEl = $('<div></div>');
+    const $transcludeEl = $('<div></div>');
     const classList = $(this.$element).get(0).classList;
     classList.remove(...['ng-scope', 'ng-isolate-scope']);
-    $scrollerEl.addClass(classList.value);
+    $transcludeEl.addClass(classList.value);
 
     const attributes = $(this.$element)[0].attributes;
     const attrOb = {};
@@ -250,7 +258,7 @@ class PaneController implements IPaneInternal {
       }
     }
 
-    $scrollerEl.attr(attrOb);
+    $transcludeEl.attr(attrOb);
 
     this.$element.addClass('ng-pane');
     this.$element.addClass('pane-' + this.id);
@@ -258,10 +266,7 @@ class PaneController implements IPaneInternal {
     this.$transcludeScope = $transcludeScope;
 
     if (this.parentCtrl) {
-      let ctrlAs = '$ctrl';
-      if (this.parentCtrlAs) {
-        ctrlAs = this.parentCtrlAs;
-      }
+      const ctrlAs = this.parentCtrlAs || '$ctrl';
       this.$transcludeScope[ctrlAs] = this.parentCtrl;
     }
 
@@ -269,19 +274,19 @@ class PaneController implements IPaneInternal {
       if (!$transcludeClone) {
         return;
       }
-      if (this.$attrs.paneNoScroll !== 'true') {
+      if (!this.noScroll) {
         $transcludeClone.addClass('ng-pane-scroller');
-        if (this.$attrs.paneScrollApi) {
-          this.setupScrollEvent(this.$element[0], $transcludeClone, this.$scope);
+        if (this.scrollApi) {
+          this.setupScrollEvent(this.$element[0], $transcludeClone, this);
         }
       }
-      $scrollerEl.append($transcludeClone);
-      this.$element.append($scrollerEl);
+      $transcludeEl.append($transcludeClone);
+      this.$element.append($transcludeEl);
 
       this.$containerEl = this.$element;
       this.$overlayEl = this.$element.children().eq(0);
       this.$handleEl = this.$element.children().eq(1);
-      this.$scrollerEl = this.$element.children().eq(2);
+      this.$transcludeEl = this.$element.children().eq(2);
 
       this.$window.addEventListener('resize', (e) => {
         e.stopPropagation();
@@ -384,12 +389,12 @@ class PaneController implements IPaneInternal {
     }
   }
 
-  public setupScrollEvent = (elementWithScrollbar, elementInsideScrollbar, elementScope) => {
+  public setupScrollEvent = (elementWithScrollbar, elementInsideScrollbar, elementCtrl: IPane) => {
     // This assignment gives access to this method to the client of the library
 
-    const thresholdFromScrollbarAndBottom = elementScope.scrollApi.threshold || 2000;
-    const scrollThrottleRate = elementScope.scrollApi.throttleRate || 500;
-    const frequency = elementScope.scrollApi.frequency || 100;
+    const thresholdFromScrollbarAndBottom = elementCtrl.scrollApi.threshold || 2000;
+    const scrollThrottleRate = elementCtrl.scrollApi.throttleRate || 500;
+    const frequency = elementCtrl.scrollApi.frequency || 100;
     let waiting = false;
     let intervalHandler;
 
@@ -425,7 +430,7 @@ class PaneController implements IPaneInternal {
       return hiddenContentHeight - elementInsideScrollbar.scrollTop() <= thresholdFromScrollbarAndBottom;
     };
 
-    elementScope.scrollApi.isScrollVisible = _isScrollbarVisible;
+    elementCtrl.scrollApi.isScrollVisible = _isScrollbarVisible;
     elementInsideScrollbar.removeAttr('pane-scroll-api');
     elementWithScrollbar.addEventListener('scroll', _scrollHandler, true);
   };
@@ -636,13 +641,13 @@ class PaneController implements IPaneInternal {
       this.size = size.toString(10);
 
       const styleContainer = region.consume(this.anchor, size);
-      const styleScroller = getScrollerStyle(this.anchor, size - handleSize);
+      const styleOverlay = getOverlayStyle(this.anchor, size - handleSize);
       const styleHandle = getHandleStyle(this.anchor, region, handleSize);
 
       this.$containerEl.attr('style', '').css(styleContainer);
-      this.$overlayEl.attr('style', '').css(styleScroller);
+      this.$overlayEl.attr('style', '').css(styleOverlay);
       this.$handleEl.attr('style', '').css(styleHandle);
-      this.$scrollerEl.attr('style', '').css(styleScroller);
+      this.$transcludeEl.attr('style', '').css(styleOverlay);
     } else {
       this.$containerEl.css({
         top: region.top + 'px',
@@ -739,7 +744,7 @@ const NgPaneComponent = {
     offsetBottom: '@paneBottom',
     offsetLeft: '@paneLeft',
     handle: '@paneHandle',
-    closed: '=paneClosed',
+    closed: '@paneClosed',
     order: '@paneOrder',
     noToggle: '@paneNoToggle',
     noScroll: '@paneNoScroll',
