@@ -1,6 +1,6 @@
 {
   "name": "@openmbee/pane-layout",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "description": "A Typescript based set of Angular.js 1.8x Components to manage and define border layouts (Hard Forked from dlamoris/angular-borderlayout",
   "main": "lib/index.js",
   "module": "lib/index.js",
