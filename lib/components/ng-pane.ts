@@ -23,7 +23,7 @@ import { TransitionService } from '@uirouter/angularjs';
 import { IPaneManagerService } from '../PaneManagerService';
 import { ngPane } from '../ng-pane';
 import { IRegion } from '../region';
-import { generateSerialId, getHandleStyle, getOrientation, getOverlayStyle, handleChange } from '../utils/utils';
+import { generateSerialId, getHandleStyle, getOrientation, getScrollerStyle, handleChange } from '../utils/utils';
 import { Region } from '../region';
 
 export interface IPaneOptions {
@@ -53,7 +53,7 @@ export interface IPane extends angular.IComponentController {
   order: number;
   noToggle: boolean;
   noScroll: boolean;
-  scrollApi: IPaneScrollApi;
+  scrollApi;
   id: string;
   parentCtrl: angular.IComponentController;
   parentCtrlAs: string;
@@ -162,7 +162,7 @@ class PaneController implements IPaneInternal {
   order: number;
   noToggle: boolean;
   noScroll: boolean;
-  scrollApi: IPaneScrollApi;
+  scrollApi;
   id: string;
   parentCtrl: angular.IComponentController;
   parentCtrlAs: string;
@@ -266,7 +266,10 @@ class PaneController implements IPaneInternal {
     this.$transcludeScope = $transcludeScope;
 
     if (this.parentCtrl) {
-      const ctrlAs = this.parentCtrlAs || '$ctrl';
+      let ctrlAs = '$ctrl';
+      if (this.parentCtrlAs) {
+        ctrlAs = this.parentCtrlAs;
+      }
       this.$transcludeScope[ctrlAs] = this.parentCtrl;
     }
 
@@ -277,7 +280,7 @@ class PaneController implements IPaneInternal {
       if (!this.noScroll) {
         $transcludeClone.addClass('ng-pane-scroller');
         if (this.scrollApi) {
-          this.setupScrollEvent(this.$element[0], $transcludeClone, this);
+          this.setupScrollEvent(this.$element[0], $transcludeClone, this.$scope);
         }
       }
       $transcludeEl.append($transcludeClone);
@@ -389,12 +392,12 @@ class PaneController implements IPaneInternal {
     }
   }
 
-  public setupScrollEvent = (elementWithScrollbar, elementInsideScrollbar, elementCtrl: IPane) => {
+  public setupScrollEvent = (elementWithScrollbar, elementInsideScrollbar, elementScope) => {
     // This assignment gives access to this method to the client of the library
 
-    const thresholdFromScrollbarAndBottom = elementCtrl.scrollApi.threshold || 2000;
-    const scrollThrottleRate = elementCtrl.scrollApi.throttleRate || 500;
-    const frequency = elementCtrl.scrollApi.frequency || 100;
+    const thresholdFromScrollbarAndBottom = elementScope.scrollApi.threshold || 2000;
+    const scrollThrottleRate = elementScope.scrollApi.throttleRate || 500;
+    const frequency = elementScope.scrollApi.frequency || 100;
     let waiting = false;
     let intervalHandler;
 
@@ -430,7 +433,7 @@ class PaneController implements IPaneInternal {
       return hiddenContentHeight - elementInsideScrollbar.scrollTop() <= thresholdFromScrollbarAndBottom;
     };
 
-    elementCtrl.scrollApi.isScrollVisible = _isScrollbarVisible;
+    elementScope.scrollApi.isScrollVisible = _isScrollbarVisible;
     elementInsideScrollbar.removeAttr('pane-scroll-api');
     elementWithScrollbar.addEventListener('scroll', _scrollHandler, true);
   };
@@ -641,13 +644,13 @@ class PaneController implements IPaneInternal {
       this.size = size.toString(10);
 
       const styleContainer = region.consume(this.anchor, size);
-      const styleOverlay = getOverlayStyle(this.anchor, size - handleSize);
+      const styleScroller = getScrollerStyle(this.anchor, size - handleSize);
       const styleHandle = getHandleStyle(this.anchor, region, handleSize);
 
       this.$containerEl.attr('style', '').css(styleContainer);
-      this.$overlayEl.attr('style', '').css(styleOverlay);
+      this.$overlayEl.attr('style', '').css(styleScroller);
       this.$handleEl.attr('style', '').css(styleHandle);
-      this.$transcludeEl.attr('style', '').css(styleOverlay);
+      this.$transcludeEl.attr('style', '').css(styleScroller);
     } else {
       this.$containerEl.css({
         top: region.top + 'px',

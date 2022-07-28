@@ -136,7 +136,7 @@ export const getOrientation = (anchor: IPaneAnchor): 'vertical' | 'horizontal' |
   }
 };
 
-export const getOverlayStyle = (anchor: IPaneAnchor, size: number): IPaneStyle => {
+export const getScrollerStyle = (anchor: IPaneAnchor, size: number): IPaneStyle => {
   const style: IPaneStyle = {
     top: '0',
     right: '0',
