@@ -704,7 +704,7 @@ class PaneController implements IPaneInternal {
     // Fix for dragging on toggle
     if (this.paneDragged) {
       this.paneDragged = false;
-      return
+      return;
     }
 
     if (open == null) {
