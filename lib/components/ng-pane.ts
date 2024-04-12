@@ -60,6 +60,7 @@ export interface IPane extends angular.IComponentController {
 
   parentPane: IPane;
   $toggled: Rx.ISubject<string>;
+  $resized: Rx.ISubject<IRegion>;
   $parent: IPaneScope;
   $region: IRegion;
   paneDragged: boolean;
@@ -173,7 +174,10 @@ class PaneController implements IPaneInternal {
   $reflowScheduled: boolean;
   $directiveScope: IPaneScope;
   $transcludeScope: IPaneScope;
+
+  // Events
   $toggled: Rx.Subject<string>;
+  $resized: Rx.ISubject<IRegion>;
 
   $containerEl: JQuery<HTMLElement>;
   $overlayEl: JQuery<HTMLElement>;
@@ -384,6 +388,7 @@ class PaneController implements IPaneInternal {
 
   $onDestroy() {
     this.$toggled.dispose();
+    this.$resized.dispose();
     if (this.parentPane) {
       this.parentPane.removeChild(this);
     }
@@ -665,6 +670,9 @@ class PaneController implements IPaneInternal {
 
     this.$region = region.clone();
     this.reflowChildren(region.getInnerRegion());
+
+    // Fire Resize event
+    this.$resized.onNext(this.$region);
   };
 
   public reflowChildren = (region: Region) => {
